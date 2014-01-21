@@ -9,6 +9,7 @@
     "monk": "*",
     "lodash": "*",
     "deep-diff": "*",
-    "jade": "*"
+    "jade": "*",
+    "fell": "0.0.2"
   }
 }
