@@ -5,6 +5,8 @@ var monk = require('monk');
 var db = monk('localhost:27017/cssProtector');
 var path = require('path');
 var util = require('util');
+var diff = require('deep-diff').diff;
+var _ = require('lodash');
 
 var fell = require('fell');
 fell.Log.configure("debug");
@@ -76,22 +78,26 @@ app.get('/diff', function(req, res){
 	var first = null;
 	var second = null;
 
-	var finished = _.after(2, doRender);
-
-	function doRender(){
-	  res.render(); // etc
+	var doRender = function(){
+		var differences = diff(first.data, second.data);
+		log.debug('differences = {0}', util.inspect(differences));
+		res.render('diff', {title: 'cssProtector', differences: differences});
 	}
+
+	var finished = _.after(2, doRender);
 
 	var collection = db.get('scanResults');
 	collection.find({ time: 1 },{},function(e,docs){
-		var body = 'Found\n';
-		for (var i = docs.length - 1; i >= 0; i--) {
-			body = body + JSON.stringify(docs[i]) + '\n';
-		}
-		res.setHeader('Content-Type', 'text/plain');
-		res.setHeader('Content-Length', Buffer.byteLength(body));
-		res.end(body);
+		first = docs[0];
+		finished();
+	});	
+
+	collection.find({ time: 4 },{},function(e,docs){
+		second = docs[0];
+		finished();
 	});
+
+
 });
 
 app.listen(port);
