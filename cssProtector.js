@@ -67,8 +67,8 @@ app.get('/', function(req, res){
 		}
 		docs = docs || [];
 
-		log.debug('Documents retrieved : {0}', util.inspect(docs));
-		res.render('index', {results: docs});
+		log.debug('Documents retrieved : {0}', util.inspect(docs,{depth:4}));
+		res.render('index', {title: 'cssProtector', results: docs});
 	});
 });
 
