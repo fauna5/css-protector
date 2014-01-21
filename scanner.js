@@ -8,7 +8,16 @@ function scan(elemId){
 	var element = document.getElementById(elemId);
 	scanElement(element, outputTree, itemsScanned, startTime);
 	console.log(outputTree);
-
+	
+	var xmlhttp=new XMLHttpRequest();
+	xmlhttp.open("POST","http://localhost:3000/data",true);
+	xmlhttp.setRequestHeader("Content-type","application/json");
+	xmlhttp.send(JSON.stringify({data: outputTree, time: Date.now()}));
+	xmlhttp.onreadystatechange = function(){
+		if (xmlhttp.readyState==4 && xmlhttp.status==200){
+			alert("Hurrah! it scanned");
+    	}
+  	}
 }
 
 function scanElement(element, outputTree, itemsScanned, startTime){
