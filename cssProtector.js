@@ -5,6 +5,13 @@ var monk = require('monk');
 var db = monk('localhost:27017/cssProtector');
 var path = require('path');
 
+var fell = require('fell');
+fell.Log.configure("debug");
+var log = fell.Log.getLogger('cssProtector');
+
+
+var port = 3000;
+
 var app = express();
 app.use(express.bodyParser());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -13,13 +20,15 @@ app.set('view engine', 'jade');
 
 app.post('/data', function(req, res){
 	var scanResult = req.body;
-	console.log(JSON.stringify(scanResult));
+	log.info("Received scan result from client : {0}", JSON.stringify(scanResult));
 	var collection = db.get('scanResults');
 	collection.insert(scanResult, function (err, doc) {
 		if (err) {
+			log.error("There was a problem adding the information to the database: {0}.", err);
 			res.send("There was a problem adding the information to the database.");
 		} else {
-			var body = JSON.stringify(scanResult) + '';
+			var body = JSON.stringify(scanResult);
+			log.debug("Scan result added to the database. {0}.", body);
 			res.setHeader('Content-Type', 'text/plain');
 			res.setHeader('Content-Length', Buffer.byteLength(body));
 			res.end(body);
@@ -33,48 +42,45 @@ app.get('/scanner.js', function(req, res){
 });
 
 app.get('/', function(req, res){
-	console.log('got index');
+	log.debug('Got request for index.');
 	var collection = db.get('scanResults');
-	collection.find({},{},function(e,docs){
-		// var body = 'Found\n';
-		// for (var i = docs.length - 1; i >= 0; i--) {
-		// 	body = body + JSON.stringify(docs[i]) + '\n';
-		// };
-		//res.setHeader('Content-Type', 'text/plain');
-		//res.setHeader('Content-Length', Buffer.byteLength(body));
-		console.log(docs);
+	collection.find({},{},function(e, docs){
+		if (e) {
+			log.error('Error reading from the database : {0}', e);
+		}
+		docs = docs || [];
+
+		log.debug('Documents retrieved : {0}', docs);
 		res.render('index', {results: docs});
 	});
 });
 
 app.get('/diff', function(req, res){
-	console.log('got diff');
+	log.debug('Got request for diff.');
 	var firstTime = req.query.first;
 	var secondTime = req.query.second;
-	console.log('diffing',firstTime, secondTime);
+	log.debug('Diffing {0}, {1}.',firstTime, secondTime);
 
 	var first = null;
 	var second = null;
 
 	var finished = _.after(2, doRender);
 
-function doRender(){
-  res.render(); // etc
-} 
-	var first
+	function doRender(){
+	  res.render(); // etc
+	}
+
 	var collection = db.get('scanResults');
 	collection.find({ time: 1 },{},function(e,docs){
 		var body = 'Found\n';
 		for (var i = docs.length - 1; i >= 0; i--) {
 			body = body + JSON.stringify(docs[i]) + '\n';
-		};
+		}
 		res.setHeader('Content-Type', 'text/plain');
 		res.setHeader('Content-Length', Buffer.byteLength(body));
 		res.end(body);
 	});
 });
 
-
-
-app.listen(3000);
-console.log('Listening on port 3000');
+app.listen(port);
+log.info('Listening on port {0}.', port);
