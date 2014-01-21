@@ -6,6 +6,13 @@ html
 	body
 		header
 			h1 CSS Protector
+		p
+			| You can submit results using&nbsp;
+			a(href="javascript:(function()%7Bvar script %3D document.createElement('script')%3Bscript.setAttribute('type'%2C 'text%2Fjavascript')%3Bscript.setAttribute('src'%2C 'http%3A%2F%2Flocalhost%3A3000%2Fscanner.js')%3Bdocument.body.appendChild(script)%7D)()") this bookmarklet
+			| . It is currently designed to run on&nbsp;
+			a(href="http://www.bbc.co.uk/news/") the bbc news site
+			| .
+		br
 		for result in results
 			.scan #{result.time}
 		//-footer.clearFloat

@@ -4,6 +4,7 @@ var mongo = require('mongodb');
 var monk = require('monk');
 var db = monk('localhost:27017/cssProtector');
 var path = require('path');
+var util = require('util');
 
 var fell = require('fell');
 fell.Log.configure("debug");
@@ -66,7 +67,7 @@ app.get('/', function(req, res){
 		}
 		docs = docs || [];
 
-		log.debug('Documents retrieved : {0}', docs);
+		log.debug('Documents retrieved : {0}', util.inspect(docs));
 		res.render('index', {results: docs});
 	});
 });
