@@ -53,11 +53,6 @@ app.post('/data', function(req, res){
 	});	
 });
 
-app.get('/scanner.js', function(req, res){
-	res.setHeader('Content-Type', 'text/javascript');
-	fs.createReadStream('scanner.js').pipe(res);
-});
-
 app.get('/', function(req, res){
 	log.debug('Got request for index.');
 	var collection = db.get('scanResults');
