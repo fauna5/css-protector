@@ -44,14 +44,13 @@ app.get('/scanner.js', function(req, res){
 app.get('/', function(req, res){
 	log.debug('Got request for index.');
 	var collection = db.get('scanResults');
-	collection.find({},{},function(e,docs){
-		// var body = 'Found\n';
-		// for (var i = docs.length - 1; i >= 0; i--) {
-		// 	body = body + JSON.stringify(docs[i]) + '\n';
-		// };
-		//res.setHeader('Content-Type', 'text/plain');
-		//res.setHeader('Content-Length', Buffer.byteLength(body));
-		log.debug(docs);
+	collection.find({},{},function(e, docs){
+		if (e) {
+			log.error('Error reading from the database : {0}', e);
+		}
+		docs = docs || [];
+
+		log.debug('Documents retrieved : {0}', docs);
 		res.render('index', {results: docs});
 	});
 });
