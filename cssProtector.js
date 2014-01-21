@@ -1,0 +1,80 @@
+var express = require('express');
+var fs = require('fs');
+var mongo = require('mongodb');
+var monk = require('monk');
+var db = monk('localhost:27017/cssProtector');
+var path = require('path');
+
+var app = express();
+app.use(express.bodyParser());
+app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'jade');
+
+app.post('/data', function(req, res){
+	var scanResult = req.body;
+	console.log(JSON.stringify(scanResult));
+	var collection = db.get('scanResults');
+	collection.insert(scanResult, function (err, doc) {
+		if (err) {
+			res.send("There was a problem adding the information to the database.");
+		} else {
+			var body = JSON.stringify(scanResult) + '';
+			res.setHeader('Content-Type', 'text/plain');
+			res.setHeader('Content-Length', Buffer.byteLength(body));
+			res.end(body);
+		}
+	});	
+});
+
+app.get('/scanner.js', function(req, res){
+	res.setHeader('Content-Type', 'text/javascript');
+	fs.createReadStream('scanner.js').pipe(res);
+});
+
+app.get('/', function(req, res){
+	console.log('got index');
+	var collection = db.get('scanResults');
+	collection.find({},{},function(e,docs){
+		// var body = 'Found\n';
+		// for (var i = docs.length - 1; i >= 0; i--) {
+		// 	body = body + JSON.stringify(docs[i]) + '\n';
+		// };
+		//res.setHeader('Content-Type', 'text/plain');
+		//res.setHeader('Content-Length', Buffer.byteLength(body));
+		console.log(docs);
+		res.render('index', {results: docs});
+	});
+});
+
+app.get('/diff', function(req, res){
+	console.log('got diff');
+	var firstTime = req.query.first;
+	var secondTime = req.query.second;
+	console.log('diffing',firstTime, secondTime);
+
+	var first = null;
+	var second = null;
+
+	var finished = _.after(2, doRender);
+
+function doRender(){
+  res.render(); // etc
+} 
+	var first
+	var collection = db.get('scanResults');
+	collection.find({ time: 1 },{},function(e,docs){
+		var body = 'Found\n';
+		for (var i = docs.length - 1; i >= 0; i--) {
+			body = body + JSON.stringify(docs[i]) + '\n';
+		};
+		res.setHeader('Content-Type', 'text/plain');
+		res.setHeader('Content-Length', Buffer.byteLength(body));
+		res.end(body);
+	});
+});
+
+
+
+app.listen(3000);
+console.log('Listening on port 3000');

@@ -1,0 +1,12 @@
+doctype
+html
+	head
+		link(rel='stylesheet', href='/index.css')
+		title #{title} - My Site
+	body
+		header
+			h1 CSS Protector
+		for result in results
+			.scan #{result.time}
+		//-footer.clearFloat
+			//-p Running on node with Express, Jade and Stylus
