@@ -13,7 +13,8 @@ var log = fell.Log.getLogger('cssProtector');
 var port = 3000;
 
 var app = express();
-app.use(express.bodyParser());
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
