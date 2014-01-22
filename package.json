@@ -1,8 +1,12 @@
 {
   "name": "css-protector",
-  "description": "Moniotrs CSS for changes",
+  "description": "Monitors CSS for changes",
   "version": "0.0.1",
   "private": true,
+  "main": "./Protector",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "express": "3.x",
     "mongodb": "*",
