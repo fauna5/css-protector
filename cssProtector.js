@@ -70,29 +70,34 @@ app.get('/', function(req, res){
 });
 
 app.get('/diff', function(req, res){
-	log.debug('Got request for diff.');
-	var firstTime = req.query.first;
-	var secondTime = req.query.second;
+	log.debug('Got request for diff {0}.', util.inspect(req));
+	var firstTime = Number(req.query.first);
+	var secondTime = Number(req.query.second);
 	log.debug('Diffing {0}, {1}.',firstTime, secondTime);
 
 	var first = null;
 	var second = null;
 
-	var doRender = function(){
+	function doRender() {
 		var differences = diff(first.data, second.data);
-		log.debug('differences = {0}', util.inspect(differences,{depth:10}));
-		res.render('diff', {title: 'cssProtector', differences: differences});
+		if (differences) {
+			log.debug('Differences = {0}', util.inspect(differences,{depth:10}));
+			res.render('diff', {title: 'cssProtector', differences: differences});
+		} else {
+			log.debug('No differences between {0} and {1}.', firstTime, secondTime);
+			res.render('nodifference', {first: firstTime, second: secondTime});
+		}
 	}
 
 	var finished = _.after(2, doRender);
 
 	var collection = db.get('scanResults');
-	collection.find({ time: +firstTime },{},function(e,docs){
+	collection.find({ time: firstTime },{},function(e,docs){
 		first = docs[0];
 		finished();
 	});	
 
-	collection.find({ time: +secondTime },{},function(e,docs){
+	collection.find({ time: secondTime },{},function(e,docs){
 		second = docs[0];
 		finished();
 	});
