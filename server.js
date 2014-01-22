@@ -1,19 +1,15 @@
 var express = require('express');
 var fs = require('fs');
-var mongo = require('mongodb');
-var monk = require('monk');
-var db = monk('localhost:27017/cssProtector');
 var path = require('path');
 var util = require('util');
-var diff = require('deep-diff').diff;
-var _ = require('lodash');
+var Protector = require('./Protector');
 
 var fell = require('fell');
 fell.Log.configure("debug");
-var log = fell.Log.getLogger('cssProtector');
-
+var log = fell.Log.getLogger('server');
 
 var port = 3000;
+var cssProtector = new Protector();
 
 var app = express();
 app.use(express.json());
@@ -40,8 +36,7 @@ app.use(allowCrossDomain);
 app.post('/data', function(req, res){
 	var scanResult = req.body;
 	log.info("Received scan result from client : {0}", JSON.stringify(scanResult));
-	var collection = db.get('scanResults');
-	collection.insert(scanResult, function (err, doc) {
+	cssProtector.submitScan(scanResult, function(err, doc) {
 		if (err) {
 			log.error("There was a problem adding the information to the database: {0}.", err);
 			res.send("There was a problem adding the information to the database.");
@@ -52,34 +47,28 @@ app.post('/data', function(req, res){
 			res.setHeader('Content-Length', Buffer.byteLength(body));
 			res.end(body);
 		}
-	});	
+	});
 });
 
 app.get('/', function(req, res){
 	log.debug('Got request for index.');
-	var collection = db.get('scanResults');
-	collection.find({},{},function(e, docs){
-		if (e) {
-			log.error('Error reading from the database : {0}', e);
+	cssProtector.getAllScans(function(err, docs) {
+		if (err) {
+			log.error('Error reading from the database : {0}', err);
 		}
-		docs = docs || [];
-
-		log.debug('Documents retrieved : {0}', util.inspect(docs,{depth:4}));
 		res.render('index', {title: 'cssProtector', results: docs});
 	});
 });
 
-app.get('/diff', function(req, res){
+app.get('/diff', function(req, res) {
 	log.debug('Got request for diff {0}.', util.inspect(req));
 	var firstTime = Number(req.query.first);
 	var secondTime = Number(req.query.second);
-	log.debug('Diffing {0}, {1}.',firstTime, secondTime);
 
-	var first = null;
-	var second = null;
-
-	function doRender() {
-		var differences = diff(first.data, second.data);
+	cssProtector.diff(firstTime, secondTime, function(error, differences) {
+		if (error) {
+			log.error("Problem diffing {0} and {1} : {2}", firstTime, secondTime, error);
+		}
 		if (differences) {
 			log.debug('Differences = {0}', util.inspect(differences,{depth:10}));
 			res.render('diff', {title: 'cssProtector', differences: differences});
@@ -87,22 +76,7 @@ app.get('/diff', function(req, res){
 			log.debug('No differences between {0} and {1}.', firstTime, secondTime);
 			res.render('nodifference', {first: firstTime, second: secondTime});
 		}
-	}
-
-	var finished = _.after(2, doRender);
-
-	var collection = db.get('scanResults');
-	collection.find({ time: firstTime },{},function(e,docs){
-		first = docs[0];
-		finished();
-	});	
-
-	collection.find({ time: secondTime },{},function(e,docs){
-		second = docs[0];
-		finished();
 	});
-
-
 });
 
 app.listen(port);

@@ -3,9 +3,9 @@
   "description": "Monitors CSS for changes",
   "version": "0.0.1",
   "private": true,
-  "main": "./cssProtector",
+  "main": "./Protector",
   "scripts": {
-    "start": "node cssProtector.js"
+    "start": "node server.js"
   },
   "dependencies": {
     "express": "3.x",
