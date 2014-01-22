@@ -29,7 +29,7 @@ var allowCrossDomain = function(req, res, next) {
 
     // intercept OPTIONS method
     if ('OPTIONS' == req.method) {
-      res.send(200);
+      res.send(401);
     }
     else {
       next();
@@ -80,19 +80,19 @@ app.get('/diff', function(req, res){
 
 	var doRender = function(){
 		var differences = diff(first.data, second.data);
-		log.debug('differences = {0}', util.inspect(differences));
+		log.debug('differences = {0}', util.inspect(differences,{depth:10}));
 		res.render('diff', {title: 'cssProtector', differences: differences});
 	}
 
 	var finished = _.after(2, doRender);
 
 	var collection = db.get('scanResults');
-	collection.find({ time: 1 },{},function(e,docs){
+	collection.find({ time: +firstTime },{},function(e,docs){
 		first = docs[0];
 		finished();
 	});	
 
-	collection.find({ time: 4 },{},function(e,docs){
+	collection.find({ time: +secondTime },{},function(e,docs){
 		second = docs[0];
 		finished();
 	});

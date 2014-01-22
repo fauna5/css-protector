@@ -14,6 +14,8 @@ html
 			| .
 		br
 		for result in results
-			.scan #{result.time}
-		//-footer.clearFloat
-			//-p Running on node with Express, Jade and Stylus
+			div(id="#{result.time}", class="scan") #{result.time}
+		footer.clearFloat
+			button#diff diff
+			button#clear clear
+		script(src='/clickr.js')

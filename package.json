@@ -10,6 +10,7 @@
     "lodash": "*",
     "deep-diff": "*",
     "jade": "*",
-    "fell": "0.0.2"
+    "fell": "0.0.2",
+    "deep-diff": "*"
   }
 }
