@@ -50,7 +50,7 @@ Protector.prototype.diff = function(firstId, secondId, callback) {
 			callback(error);
 		} else {
 			var differences = diff(first.data, second.data);
-			callback(null, differences);
+			callback(null, differences, first, second);
 		}
 	}
 
@@ -62,6 +62,7 @@ Protector.prototype.diff = function(firstId, secondId, callback) {
 			error = e;
 		} else {
 			first = docs[0];
+			log.debug(first);
 		}
 		finished();
 	});
@@ -71,6 +72,7 @@ Protector.prototype.diff = function(firstId, secondId, callback) {
 			error = e;
 		} else {
 			second = docs[0];
+			log.debug(second);
 		}
 		finished();
 	});

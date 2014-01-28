@@ -22,14 +22,7 @@ var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-
-    // intercept OPTIONS method
-    if ('OPTIONS' == req.method) {
-      res.send(200);
-    }
-    else {
-      next();
-    }
+	next();
 };
 app.use(allowCrossDomain);
 
@@ -61,7 +54,7 @@ app.get('/', function(req, res){
 });
 
 app.get('/diff', function(req, res) {
-	log.debug('Got request for diff {0}.', util.inspect(req));
+	log.debug('Got request for diff.');
 	var firstTime = Number(req.query.first);
 	var secondTime = Number(req.query.second);
 

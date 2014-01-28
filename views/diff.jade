@@ -2,9 +2,13 @@ doctype
 html
 	head
 		link(rel='stylesheet', href='/index.css')
-		title #{title}
+		title CSS Protector
 	body
 		header
 			h1 CSS Protector
-		for difference in differences
+		for difference in diffResult.differences
 			p #{difference.kind} #{difference.path} 
+		h3 First data
+		p #{diffResult.first}
+		h3 Second data
+		p #{diffResult.second}
